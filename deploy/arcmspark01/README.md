@@ -16,6 +16,8 @@ Data jsou mimo repozitář v `/home/spark/open-notebook-data`, modely v `/home/s
 
 Paměť (128 GB unified): Qwen `--gpu-memory-utilization 0.70`, bge-m3 `0.06`, Whisper `0.05`; zbytek pro systém a aplikaci. Na arcmspark01 proto nesmí současně běžet jiný velký model.
 
+**Více uživatelů** (každý vlastní instanci, přihlášení doménovým účtem z UCS nebo místním účtem): [VICE-UZIVATELU.md](VICE-UZIVATELU.md).
+
 Všechny příkazy níže se spouštějí na stroji **arcmspark01** pod uživatelem **spark**, v terminálu přes SSH z Macu (`Hyneks-Mac-mini`). Konfigurace v prohlížeči (krok 10) se dělá na Macu.
 
 ---

@@ -214,18 +214,29 @@ def api(metoda: str, url: str, heslo: str, data: dict | None = None):
 
 def main() -> int:
     skript_dir = Path(__file__).resolve().parent
-    parser = argparse.ArgumentParser(description="Přeloží vestavěné transformace do češtiny.")
+    parser = argparse.ArgumentParser(
+        description="Přeloží vestavěné transformace do češtiny."
+    )
     parser.add_argument("--api", default="http://127.0.0.1:5055/api", help="adresa API")
-    parser.add_argument("--nanecisto", action="store_true", help="jen vypsat, nic neměnit")
+    parser.add_argument(
+        "--nanecisto", action="store_true", help="jen vypsat, nic neměnit"
+    )
     parser.add_argument(
         "--zaloha",
         default=f"/home/spark/open-notebook-data/transformace-zaloha-{dt.datetime.now():%Y%m%d-%H%M%S}.json",
         help="soubor se zálohou původních hodnot",
     )
-    parser.add_argument("--bez-vychoziho-promptu", action="store_true", help="výchozí prompt neměnit")
+    parser.add_argument(
+        "--bez-vychoziho-promptu", action="store_true", help="výchozí prompt neměnit"
+    )
+    parser.add_argument(
+        "--bez-hesla",
+        action="store_true",
+        help="instance bez hesla (režim více uživatelů – přihlašuje Caddy/Dex)",
+    )
     args = parser.parse_args()
 
-    heslo = nacti_heslo(skript_dir)
+    heslo = "" if args.bez_hesla else nacti_heslo(skript_dir)
     try:
         transformace = api("GET", f"{args.api}/transformations", heslo)
         vychozi = api("GET", f"{args.api}/transformations/default-prompt", heslo)
@@ -239,7 +250,11 @@ def main() -> int:
     if not args.nanecisto:
         Path(args.zaloha).parent.mkdir(parents=True, exist_ok=True)
         Path(args.zaloha).write_text(
-            json.dumps({"transformace": transformace, "vychozi_prompt": vychozi}, ensure_ascii=False, indent=2),
+            json.dumps(
+                {"transformace": transformace, "vychozi_prompt": vychozi},
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
         print(f"Záloha uložena: {args.zaloha}")
@@ -268,14 +283,27 @@ def main() -> int:
         elif args.nanecisto:
             print("  -> výchozí prompt transformací bude nahrazen českým (nanečisto)")
         else:
-            api("PUT", f"{args.api}/transformations/default-prompt", heslo, {"transformation_instructions": VYCHOZI_PROMPT})
+            api(
+                "PUT",
+                f"{args.api}/transformations/default-prompt",
+                heslo,
+                {"transformation_instructions": VYCHOZI_PROMPT},
+            )
             print("  ✓ výchozí prompt transformací přeložen")
             zmeneno += 1
 
-    ostatni = [t["name"] for t in transformace if t["name"] not in {p["puvodni"] for p in PREKLADY} | {p["name"] for p in PREKLADY}]
+    ostatni = [
+        t["name"]
+        for t in transformace
+        if t["name"]
+        not in {p["puvodni"] for p in PREKLADY} | {p["name"] for p in PREKLADY}
+    ]
     if ostatni:
         print(f"Vlastní transformace beze změny: {', '.join(ostatni)}")
-    print(f"HOTOVO, změněno položek: {zmeneno}" + (" (nanečisto, nic se nezměnilo)" if args.nanecisto else ""))
+    print(
+        f"HOTOVO, změněno položek: {zmeneno}"
+        + (" (nanečisto, nic se nezměnilo)" if args.nanecisto else "")
+    )
     return 0
 
 

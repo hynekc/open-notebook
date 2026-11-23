@@ -1,0 +1,85 @@
+# Open Notebook pro více uživatelů na arcmspark01
+# Autor: Hynek Cihlář (Bc. Hynek Cihlář)
+#
+# Doplněk k docker-compose.yml. Každý uživatel má vlastní instanci Open
+# Notebooku (vlastní databázi v SurrealDB, vlastní složku s daty, vlastní
+# šifrovací klíč). Modely vLLM (Qwen, bge-m3, Whisper) jsou sdílené.
+#
+#   prohlížeč ──HTTPS──> caddy ──> oauth2-proxy ──> dex (místní účty + LDAP UCS)
+#                          │
+#                          └── podle přihlášeného e-mailu ──> on-u-<zkratka>:8502
+#
+# Instance uživatelů a konfiguraci Caddy a Dexu vytváří skript
+# generovat-vice-uzivatelu.py do složky vice-uzivatelu/ (není v gitu).
+# Zapíná se v .env řádkem:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.vice-uzivatelu.yml:vice-uzivatelu/docker-compose.uzivatele.yml
+# Postup: VICE-UZIVATELU.md
+
+services:
+  # Původní jednouživatelská instance (on-app, porty 8502/5055) se v režimu
+  # více uživatelů nespouští – její data přebírá instance uživatele
+  # označeného v uzivatele.conf jako „puvodni=ano“.
+  open_notebook:
+    profiles: ["jedna-instance"]
+
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2-alpine}
+    container_name: on-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./vice-uzivatelu/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/caddy/certs:/certs:ro
+      - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/caddy/data:/data
+      - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/caddy/config:/config
+    depends_on:
+      - oauth2-proxy
+      - dex
+    restart: unless-stopped
+
+  oauth2-proxy:
+    image: ${OAUTH2_PROXY_IMAGE:-quay.io/oauth2-proxy/oauth2-proxy:v7.15.3}
+    container_name: on-oauth2-proxy
+    environment:
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
+      - OAUTH2_PROXY_PROVIDER=oidc
+      - OAUTH2_PROXY_PROVIDER_DISPLAY_NAME=Open Notebook
+      - OAUTH2_PROXY_CLIENT_ID=open-notebook
+      - OAUTH2_PROXY_CLIENT_SECRET=${OAUTH2_CLIENT_SECRET:?Nastavte OAUTH2_CLIENT_SECRET v .env}
+      - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_COOKIE_SECRET:?Nastavte OAUTH2_COOKIE_SECRET v .env}
+      - OAUTH2_PROXY_COOKIE_NAME=_on_sso
+      - OAUTH2_PROXY_COOKIE_SECURE=true
+      - OAUTH2_PROXY_COOKIE_EXPIRE=${SSO_PRIHLASENI_PLATI:-12h}
+      - OAUTH2_PROXY_REDIRECT_URL=https://${ON_HOSTNAME:?Nastavte ON_HOSTNAME v .env}/oauth2/callback
+      - OAUTH2_PROXY_WHITELIST_DOMAINS=${ON_HOSTNAME}
+      # Vydavatel (Dex) je pro prohlížeč na https://ON_HOSTNAME/dex. Kontejner
+      # mluví s Dexem napřímo po interní síti, takže nemusí důvěřovat
+      # certifikátu Caddy – proto se discovery vynechává a adresy jsou zadané.
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://${ON_HOSTNAME}/dex
+      - OAUTH2_PROXY_SKIP_OIDC_DISCOVERY=true
+      - OAUTH2_PROXY_LOGIN_URL=https://${ON_HOSTNAME}/dex/auth
+      - OAUTH2_PROXY_REDEEM_URL=http://dex:5556/dex/token
+      - OAUTH2_PROXY_OIDC_JWKS_URL=http://dex:5556/dex/keys
+      - OAUTH2_PROXY_SCOPE=openid email profile
+      - OAUTH2_PROXY_CODE_CHALLENGE_METHOD=S256
+      # Kdo smí dál, rozhoduje Caddy podle seznamu uživatelů (uzivatele.conf).
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_REVERSE_PROXY=true
+      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
+      - OAUTH2_PROXY_UPSTREAMS=static://202
+      - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
+    depends_on:
+      - dex
+    restart: unless-stopped
+
+  dex:
+    image: ${DEX_IMAGE:-ghcr.io/dexidp/dex:v2.45.1}
+    container_name: on-dex
+    # dex.yaml má práva 600 a patří uživateli spark – Dex ho čte pod jeho UID
+    user: "${ON_UID:-1000}:${ON_GID:-1000}"
+    command: ["dex", "serve", "/etc/dex/config.yaml"]
+    volumes:
+      - ./vice-uzivatelu/dex.yaml:/etc/dex/config.yaml:ro
+      - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/caddy/certs/ucs-root-ca.crt:/etc/dex/ucs-root-ca.crt:ro
+    restart: unless-stopped

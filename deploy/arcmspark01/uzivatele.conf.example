@@ -1,0 +1,20 @@
+# Uživatelé Open Notebooku na arcmspark01 (nejvýš 5)
+# Zkopírujte do uzivatele.conf (soubor není v gitu) a upravte.
+# Po každé změně spusťte: python3 generovat-vice-uzivatelu.py
+#
+# Sloupce oddělené mezerami:
+#   zkratka   – název instance: malá písmena bez diakritiky, číslice, pomlčka
+#               (kontejner on-u-<zkratka>, databáze u_<zkratka>)
+#   e-mail    – podle něj se po přihlášení vybere instance
+#               ldap:   <uživatelské jméno v UCS>@<LDAP_EMAIL_PRIPONA z .env>
+#               mistni: libovolný e-mail, uživatel ho zadává při přihlášení
+#   zdroj     – ldap (účet v UCS) nebo mistni (účet jen pro Open Notebook)
+#   volby     – heslo=<bcrypt otisk>   povinné u zdroje mistni
+#               puvodni=ano            převezme data dosavadní jednouživatelské
+#                                      instance (databáze open_notebook,
+#                                      složka notebook_data); nejvýš jeden řádek
+#
+# zkratka  e-mail                    zdroj   volby
+hynek      hcihlar@cajk32.lab        ldap    puvodni=ano
+jana       jana.novakova@cajk32.lab  ldap
+host1      host1@notebook.local      mistni  heslo=$2a$14$NAHRADTE.OTISKEM.Z.PRIKAZU.caddy.hash-password.xxxxxxxxxxxx
