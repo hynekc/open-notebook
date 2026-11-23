@@ -1014,6 +1014,11 @@ export const frFR = {
     apiKeyEditHint: "Laissez vide pour conserver la clé API existante",
     decryptionError: "Erreur de déchiffrement",
     decryptionErrorDescription: "La clé API de cette configuration n'a pas pu être déchiffrée. La clé de chiffrement a peut-être changé. Supprimez cette configuration et recréez-la avec la bonne clé.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Clé de chiffrement non configurée",

@@ -1017,6 +1017,11 @@ export const deDE = {
     apiKeyEditHint: "Leer lassen, um den vorhandenen API-Schlüssel beizubehalten",
     decryptionError: "Entschlüsselungsfehler",
     decryptionErrorDescription: "Der API-Schlüssel dieser Zugangsdaten konnte nicht entschlüsselt werden. Möglicherweise hat sich der Verschlüsselungsschlüssel geändert. Lösche diese Zugangsdaten und erstelle sie mit dem richtigen Schlüssel neu.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Verschlüsselungsschlüssel nicht konfiguriert",

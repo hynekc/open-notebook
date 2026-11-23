@@ -1014,6 +1014,11 @@ export const zhCN = {
     apiKeyEditHint: "留空以保留现有 API 密钥",
     decryptionError: "解密错误",
     decryptionErrorDescription: "此凭证的 API 密钥无法解密。加密密钥可能已更改。请删除此凭证并使用正确的密钥重新创建。",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "未配置加密密钥",

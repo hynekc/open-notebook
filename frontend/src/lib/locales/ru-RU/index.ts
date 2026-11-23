@@ -1014,6 +1014,11 @@ export const ruRU = {
     apiKeyEditHint: "Оставьте пустым, чтобы сохранить текущий API-ключ",
     decryptionError: "Ошибка расшифровки",
     decryptionErrorDescription: "API-ключ этих учётных данных не удалось расшифровать. Возможно, ключ шифрования был изменён. Удалите эти учётные данные и создайте заново с правильным ключом.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Ключ шифрования не настроен",

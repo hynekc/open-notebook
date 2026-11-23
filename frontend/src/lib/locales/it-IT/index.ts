@@ -1014,6 +1014,11 @@ export const itIT = {
     apiKeyEditHint: "Lascia vuoto per mantenere la chiave API esistente",
     decryptionError: "Errore di decrittazione",
     decryptionErrorDescription: "La chiave API di questa credenziale non può essere decrittata. La chiave di crittografia potrebbe essere cambiata. Elimina questa credenziale e ricreala con la chiave corretta.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Chiave di crittografia non configurata",

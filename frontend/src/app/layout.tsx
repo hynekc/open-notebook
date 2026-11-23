@@ -15,18 +15,18 @@ import { themeScript } from "@/lib/theme-script";
 import { I18nProvider } from "@/components/providers/I18nProvider";
 
 const instrumentSans = Instrument_Sans({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-instrument-sans",
 });
 
 const bricolageGrotesque = Bricolage_Grotesque({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["600", "700"],
   variable: "--font-bricolage",
 });
 
 const splineSansMono = Spline_Sans_Mono({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-spline-mono",
 });
 

@@ -1014,6 +1014,11 @@ export const ptBR = {
     apiKeyEditHint: "Deixe em branco para manter a chave de API existente",
     decryptionError: "Erro de Descriptografia",
     decryptionErrorDescription: "A chave de API desta credencial não pôde ser descriptografada. A chave de criptografia pode ter sido alterada. Exclua esta credencial e recrie-a com a chave correta.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Chave de criptografia não configurada",

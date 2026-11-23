@@ -1014,6 +1014,11 @@ export const plPL = {
     apiKeyEditHint: "Pozostaw puste, aby zachować istniejący klucz API",
     decryptionError: "Błąd odszyfrowywania",
     decryptionErrorDescription: "Nie udało się odszyfrować klucza API tego poświadczenia. Klucz szyfrowania mógł ulec zmianie. Usuń to poświadczenie i utwórz je ponownie z prawidłowym kluczem.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Klucz szyfrowania nie został skonfigurowany",

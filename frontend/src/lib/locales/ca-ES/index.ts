@@ -1014,6 +1014,11 @@ export const caES = {
     apiKeyEditHint: "Deixa-ho en blanc per conservar la clau de l'API existent",
     decryptionError: "Error de desencriptació",
     decryptionErrorDescription: "No s'ha pogut desencriptar la clau de l'API d'aquesta credencial. La clau d'encriptació pot haver canviat. Suprimeix aquesta credencial i torna-la a crear amb la clau correcta.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Clau de xifratge no configurada",

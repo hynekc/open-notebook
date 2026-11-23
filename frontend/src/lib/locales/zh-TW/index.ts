@@ -1014,6 +1014,11 @@ export const zhTW = {
     apiKeyEditHint: "留空以保留現有 API 金鑰",
     decryptionError: "解密錯誤",
     decryptionErrorDescription: "此憑證的 API 金鑰無法解密。加密金鑰可能已變更。請刪除此憑證並使用正確的金鑰重新建立。",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "未設定加密金鑰",

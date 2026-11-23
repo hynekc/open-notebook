@@ -1014,6 +1014,11 @@ export const enUS = {
     apiKeyEditHint: "Leave blank to keep the existing API key",
     decryptionError: "Decryption Error",
     decryptionErrorDescription: "This credential's API key could not be decrypted. The encryption key may have changed. Delete this credential and re-create it with the correct key.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Encryption key not configured",

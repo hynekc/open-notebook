@@ -1014,6 +1014,11 @@ export const trTR = {
     apiKeyEditHint: "Mevcut API anahtarını korumak için boş bırakın",
     decryptionError: "Şifre Çözme Hatası",
     decryptionErrorDescription: "Bu kimlik bilgisinin API anahtarı çözülemedi. Şifreleme anahtarı değişmiş olabilir. Bu kimlik bilgisini silin ve doğru anahtarla yeniden oluşturun.",
+    linkedModels: "This configuration has {{count}} linked model(s).",
+    migrateModelsTo: "Migrate models to:",
+    selectCredential: "Select configuration",
+    migrateAndDelete: "Migrate & Delete",
+    deleteWithModels: "Delete with Models",
   },
   setupBanner: {
     encryptionRequired: "Şifreleme anahtarı yapılandırılmadı",
