@@ -4,6 +4,7 @@
 # Čtyři služby na jednom Sparku:
 #   vllm-qwen      jazykový model Qwen/Qwen3.8-27B-FP8 + MTP (vLLM, GPU)
 #   vllm-embed     embedding model BAAI/bge-m3 (vLLM, GPU)
+#   vllm-whisper   přepis řeči openai/whisper-large-v3 (vLLM, GPU)
 #   surrealdb      databáze Open Notebooku
 #   open_notebook  webové rozhraní (8502), API (5055) a worker – image se staví
 #                  z tohoto repozitáře (větev cs-CZ s českým UI)
@@ -118,6 +119,43 @@ services:
       retries: 5
       start_period: 900s
 
+  vllm-whisper:
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:qwen38}
+    container_name: on-vllm-whisper
+    restart: unless-stopped
+    ipc: host
+    environment:
+      - HF_HOME=/root/.cache/huggingface
+    volumes:
+      - ${HF_CACHE_DIR:-/home/spark/.cache/huggingface}:/root/.cache/huggingface
+    ports:
+      - "127.0.0.1:${WHISPER_HOST_PORT:-8012}:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command:
+      - openai/whisper-large-v3
+      - --served-model-name
+      - whisper-large-v3
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --gpu-memory-utilization
+      - "${WHISPER_GPU_MEM:-0.05}"
+      - --max-num-seqs
+      - "4"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=5).status==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 1800s
+
   surrealdb:
     image: surrealdb/surrealdb:v2
     container_name: on-surrealdb
@@ -155,10 +193,14 @@ services:
       # Volitelně: Docling (tabulky, OCR skenů, obrázky). První start stáhne
       # několik GB. Zapnete nastavením ENABLE_DOCLING=true v .env.
       - OPEN_NOTEBOOK_ENABLE_DOCLING=${ENABLE_DOCLING:-false}
+      # Přepis zvuku a videa přes Whisper (vllm-whisper): Open Notebook dělí
+      # nahrávky na 10min úseky; s jedním lokálním serverem posílat po dvou.
+      - CCORE_AUDIO_CONCURRENCY=${CCORE_AUDIO_CONCURRENCY:-2}
     volumes:
       - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/notebook_data:/app/data
     depends_on:
       - surrealdb
       - vllm-qwen
       - vllm-embed
+      - vllm-whisper
     restart: unless-stopped

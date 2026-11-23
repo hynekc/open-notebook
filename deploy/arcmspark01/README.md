@@ -8,12 +8,13 @@ Plně lokální Open Notebook s českým rozhraním a českou nápovědou na jed
 |---|---|---|---|
 | `vllm-qwen` | `on-vllm-qwen` | Jazykový model **Qwen/Qwen3.8-27B-FP8** + MTP (vLLM), název modelu `qwen3.8-27b` | jen `127.0.0.1:8010` |
 | `vllm-embed` | `on-vllm-embed` | Embedding model **BAAI/bge-m3** (vícejazyčný, 1024 dimenzí), název `bge-m3` | jen `127.0.0.1:8011` |
+| `vllm-whisper` | `on-vllm-whisper` | Přepis řeči **openai/whisper-large-v3** (zvukové a video zdroje), název `whisper-large-v3` | jen `127.0.0.1:8012` |
 | `surrealdb` | `on-surrealdb` | Databáze Open Notebooku | nepublikuje se |
 | `open_notebook` | `on-app` | Webové rozhraní, API a worker – image se staví z větve `cs-CZ` repozitáře `hynekc/open-notebook` | `8502` (UI), `5055` (API) |
 
 Data jsou mimo repozitář v `/home/spark/open-notebook-data`, modely v `/home/spark/.cache/huggingface`.
 
-Paměť (128 GB unified): Qwen `--gpu-memory-utilization 0.70`, bge-m3 `0.06`; zbytek pro systém a aplikaci. Na arcmspark01 proto nesmí současně běžet jiný velký model.
+Paměť (128 GB unified): Qwen `--gpu-memory-utilization 0.70`, bge-m3 `0.06`, Whisper `0.05`; zbytek pro systém a aplikaci. Na arcmspark01 proto nesmí současně běžet jiný velký model.
 
 Všechny příkazy níže se spouštějí na stroji **arcmspark01** pod uživatelem **spark**, v terminálu přes SSH z Macu (`Hyneks-Mac-mini`). Konfigurace v prohlížeči (krok 10) se dělá na Macu.
 
@@ -378,5 +379,9 @@ ls -lh /home/spark/open-notebook-backup-*.tar.gz | tail -1
 | Odpovědi v aplikaci vyprší po 420 s | Dlouhý kontext; zmenšete výběr zdrojů nebo zvyšte `ESPERANTO_LLM_TIMEOUT` (max. 590) v `.env` a `sudo docker compose up -d open_notebook` |
 | Zdroje zůstávají „Ve frontě“ | `sudo docker logs on-app 2>&1 \| grep -E "worker entered\|exited: worker"` |
 | Test konfigurace v aplikaci selže | `sudo docker exec on-app curl -s http://vllm-qwen:8000/v1/models` musí vrátit JSON s `qwen3.8-27b` |
+
+## Přepis řeči (Whisper)
+
+Převod textu na řeč (podcasty) se zatím nenasazuje. Převod řeči na text zajišťuje služba `vllm-whisper`; v aplikaci ji přidáte jako konfiguraci **OpenAI Compatible** se základní URL `http://vllm-whisper:8000/v1`, modelem `whisper-large-v3` typu **STT** a vyberete ji jako **Model převodu řeči na text**.
 
 Podrobná česká nápověda: [docs/cs](../../docs/cs/index.md).
