@@ -14,6 +14,7 @@ import {
 } from '@/lib/hooks/use-credentials'
 import { useProviders } from '@/lib/hooks/use-providers'
 import { useDismissibleWarning } from '@/lib/hooks/use-dismissible-warning'
+import { docsUrl } from '@/lib/docs-links'
 import { Credential } from '@/lib/api/credentials'
 import {
   DefaultModelSelectors,
@@ -22,7 +23,7 @@ import {
 } from '@/components/settings'
 
 export default function ApiKeysPage() {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
 
   // Data
   const { data: credentials, isLoading: credentialsLoading } = useCredentials()
@@ -133,7 +134,7 @@ export default function ApiKeysPage() {
               <AlertDescription className="text-warn">
                 {t('securityWarnings.defaultKeyDescription')}{' '}
                 <a
-                  href="https://github.com/lfnovo/open-notebook/blob/main/docs/5-CONFIGURATION/security.md"
+                  href={docsUrl('5-CONFIGURATION/security.md', language)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
@@ -178,7 +179,7 @@ export default function ApiKeysPage() {
           {/* Help link */}
           <div className="border-t pt-4">
             <a
-              href="https://github.com/lfnovo/open-notebook/blob/main/docs/5-CONFIGURATION/ai-providers.md"
+              href={docsUrl('5-CONFIGURATION/ai-providers.md', language, '4-AI-PROVIDERS/index.md#connect-a-provider')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-primary hover:underline"

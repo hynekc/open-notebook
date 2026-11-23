@@ -11,6 +11,7 @@ import {
 import { Database, Server, ChevronDown, ExternalLink } from 'lucide-react'
 import { ConnectionError } from '@/lib/types/config'
 import { useTranslation } from '@/lib/hooks/use-translation'
+import { docsUrl } from '@/lib/docs-links'
 
 interface ConnectionErrorOverlayProps {
   error: ConnectionError
@@ -21,7 +22,7 @@ export function ConnectionErrorOverlay({
   error,
   onRetry,
 }: ConnectionErrorOverlayProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const [showDetails, setShowDetails] = useState(false)
   const isApiError = error.type === 'api-unreachable'
 
@@ -106,7 +107,7 @@ export function ConnectionErrorOverlay({
         <div className="text-sm">
           <p>{t('connectionErrors.seeDocumentation')}</p>
           <a
-            href="https://github.com/lfnovo/open-notebook"
+            href={language?.startsWith('cs') ? docsUrl('6-TROUBLESHOOTING/connection-issues.md', language) : 'https://github.com/lfnovo/open-notebook'}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline inline-flex items-center gap-1"
