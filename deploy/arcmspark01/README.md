@@ -380,6 +380,15 @@ ls -lh /home/spark/open-notebook-backup-*.tar.gz | tail -1
 | Zdroje zůstávají „Ve frontě“ | `sudo docker logs on-app 2>&1 \| grep -E "worker entered\|exited: worker"` |
 | Test konfigurace v aplikaci selže | `sudo docker exec on-app curl -s http://vllm-qwen:8000/v1/models` musí vrátit JSON s `qwen3.8-27b` |
 
+## České transformace
+
+Vestavěné transformace (Analyze Paper, Key Insights, Dense Summary, Reflections, Table of Contents, Simple Summary) a výchozí prompt transformací vkládá databáze při prvním startu anglicky. Skript `prelozit-transformace.py` je přes REST API přepíše na české verze (název, popis, prompt; vlastní transformace nemění) a před změnou uloží zálohu do `/home/spark/open-notebook-data/transformace-zaloha-*.json`. Spouští se na arcmspark01 ve složce `/home/spark/open-notebook/deploy/arcmspark01`:
+
+```bash
+python3 prelozit-transformace.py --nanecisto
+python3 prelozit-transformace.py
+```
+
 ## Přepis řeči (Whisper)
 
 Převod textu na řeč (podcasty) se zatím nenasazuje. Převod řeči na text zajišťuje služba `vllm-whisper`. Běží offline (`HF_HUB_OFFLINE=1`), protože repozitář modelu obsahuje i varianty vah, které by vLLM stáhl navíc (přes 10 GB). Potřebné soubory (~3 GB) se stáhnou předem na arcmspark01, složka `/home/spark/open-notebook/deploy/arcmspark01`:
