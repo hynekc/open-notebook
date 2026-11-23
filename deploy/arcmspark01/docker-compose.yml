@@ -126,6 +126,10 @@ services:
     ipc: host
     environment:
       - HF_HOME=/root/.cache/huggingface
+      # Repozitář openai/whisper-large-v3 obsahuje i varianty vah (fp32 ad.),
+      # které by vLLM stáhl navíc. Váhy se stáhnou předem jen potřebné
+      # (viz README, Přepis řeči) a služba běží offline.
+      - HF_HUB_OFFLINE=${WHISPER_HF_OFFLINE:-1}
     volumes:
       - ${HF_CACHE_DIR:-/home/spark/.cache/huggingface}:/root/.cache/huggingface
     ports:

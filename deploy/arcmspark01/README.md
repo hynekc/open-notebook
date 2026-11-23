@@ -382,6 +382,12 @@ ls -lh /home/spark/open-notebook-backup-*.tar.gz | tail -1
 
 ## Přepis řeči (Whisper)
 
-Převod textu na řeč (podcasty) se zatím nenasazuje. Převod řeči na text zajišťuje služba `vllm-whisper`; v aplikaci ji přidáte jako konfiguraci **OpenAI Compatible** se základní URL `http://vllm-whisper:8000/v1`, modelem `whisper-large-v3` typu **STT** a vyberete ji jako **Model převodu řeči na text**.
+Převod textu na řeč (podcasty) se zatím nenasazuje. Převod řeči na text zajišťuje služba `vllm-whisper`. Běží offline (`HF_HUB_OFFLINE=1`), protože repozitář modelu obsahuje i varianty vah, které by vLLM stáhl navíc (přes 10 GB). Potřebné soubory (~3 GB) se stáhnou předem na arcmspark01, složka `/home/spark/open-notebook/deploy/arcmspark01`:
+
+```bash
+sudo docker run --rm -v /home/spark/.cache/huggingface:/root/.cache/huggingface --entrypoint python3 vllm/vllm-openai:qwen38 -c "from huggingface_hub import snapshot_download; print(snapshot_download('openai/whisper-large-v3', allow_patterns=['*.json', '*.txt', 'model.safetensors']))"
+```
+
+V aplikaci službu přidáte jako konfiguraci **OpenAI Compatible** se základní URL `http://vllm-whisper:8000/v1`, modelem `whisper-large-v3` typu **STT** a vyberete ji jako **Model převodu řeči na text**.
 
 Podrobná česká nápověda: [docs/cs](../../docs/cs/index.md).
