@@ -51,3 +51,5 @@ docs
 *.swo
 *~
 .DS_Store
+# Deployment configs (data dirs there can be large)
+deploy
