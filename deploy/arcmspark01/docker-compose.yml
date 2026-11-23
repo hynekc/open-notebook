@@ -120,7 +120,13 @@ services:
       start_period: 900s
 
   vllm-whisper:
-    image: ${VLLM_IMAGE:-vllm/vllm-openai:qwen38}
+    # vLLM s doinstalovanými knihovnami pro čtení zvuku (librosa, soundfile, av)
+    build:
+      context: .
+      dockerfile: whisper.Dockerfile
+      args:
+        VLLM_IMAGE: ${VLLM_IMAGE:-vllm/vllm-openai:qwen38}
+    image: vllm-openai-audio:${ON_IMAGE_TAG:-local}
     container_name: on-vllm-whisper
     restart: unless-stopped
     ipc: host

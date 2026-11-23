@@ -397,6 +397,8 @@ Převod textu na řeč (podcasty) se zatím nenasazuje. Převod řeči na text z
 sudo docker run --rm -v /home/spark/.cache/huggingface:/root/.cache/huggingface --entrypoint python3 vllm/vllm-openai:qwen38 -c "from huggingface_hub import snapshot_download; print(snapshot_download('openai/whisper-large-v3', allow_patterns=['*.json', '*.txt', 'model.safetensors']))"
 ```
 
+Image `vllm/vllm-openai:qwen38` nemá knihovny pro čtení zvuku, proto se pro Whisper staví vlastní image `vllm-openai-audio:local` ze souboru `whisper.Dockerfile` (doplní `librosa`, `soundfile`, `av`): `sudo docker compose build vllm-whisper`.
+
 V aplikaci službu přidáte jako konfiguraci **OpenAI Compatible** se základní URL `http://vllm-whisper:8000/v1`, modelem `whisper-large-v3` typu **STT** a vyberete ji jako **Model převodu řeči na text**.
 
 Podrobná česká nápověda: [docs/cs](../../docs/cs/index.md).
