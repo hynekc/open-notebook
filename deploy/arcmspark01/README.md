@@ -55,6 +55,7 @@ nvidia-smi --query-gpu=name,driver_version --format=csv,noheader
 free -g | head -2
 df -h /home/spark | tail -1
 sudo docker ps --format '{{.Names}}  {{.Image}}'
+sudo docker manifest inspect vllm/vllm-openai:qwen38 | grep -c '"arm64"'
 ```
 
 **Očekávaný výstup:**
@@ -63,6 +64,7 @@ sudo docker ps --format '{{.Names}}  {{.Image}}'
 - v řádku `Mem:` sloupec `available` alespoň **100** (GB) – jinak na Sparku běží jiný model; zastavte ho
 - v `df` sloupec `Avail` alespoň **80G** (image ~20 GB, Qwen ~31 GB, bge-m3 ~2,3 GB, image Open Notebooku ~4 GB)
 - `docker ps` neukazuje žádný běžící kontejner s vLLM (pokud ano, zastavte ho, jinak nebude dost paměti)
+- poslední příkaz vypíše číslo **1 nebo vyšší** (image vLLM existuje pro ARM64). Pokud vypíše `0` nebo chybu, v kroku 4 do `.env` nastavte `VLLM_IMAGE=ghcr.io/spark-arena/dgx-vllm-eugr-nightly:latest`
 
 ---
 
