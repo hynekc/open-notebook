@@ -403,4 +403,83 @@ Image `vllm/vllm-openai:qwen38` nemá knihovny pro čtení zvuku, proto se pro W
 
 V aplikaci službu přidáte jako konfiguraci **OpenAI Compatible** se základní URL `http://vllm-whisper:8000/v1`, modelem `whisper-large-v3` typu **STT** a vyberete ji jako **Model převodu řeči na text**.
 
+## Vyhledávání zdrojů na webu (SearXNG)
+
+Služba `searxng` (kontejner `on-searxng`) je vlastní vyhledávač: dotazy předává veřejným vyhledávačům bez API klíčů a výsledky vrací Open Notebooku ve formátu JSON. V aplikaci pak přibude v dialogu **Přidat zdroj** karta **Vyhledat na webu** a v nabídce sešitu **Přidat zdroj → Vyhledat na webu**. Nastavení je v `searxng/settings.yml`, tajný klíč v `.env` (`SEARXNG_SECRET`). Vypnutí: `WEB_SEARCH_URL=` (prázdné) v `.env` a `sudo docker compose up -d`.
+
+Platí pro režim jednoho uživatele (kontejner `on-app`). V režimu více uživatelů je postup v [VICE-UZIVATELU.md](VICE-UZIVATELU.md), kde se image sestavuje s `--profile jedna-instance`.
+
+### 1. Nová verze repozitáře a tajný klíč SearXNG
+
+**Stroj:** arcmspark01 · **Složka:** `/home/spark/open-notebook/deploy/arcmspark01` · **Terminál:** SSH
+
+```bash
+cd /home/spark/open-notebook/deploy/arcmspark01
+git -C /home/spark/open-notebook pull
+git -C /home/spark/open-notebook log -1 --format='%h %an %s'
+grep -q '^SEARXNG_SECRET=' .env || sed -n '/VYHLEDÁVÁNÍ ZDROJŮ NA WEBU/,/^WEB_SEARCH_URL=/p' .env.example >> .env
+sed -i "s/^SEARXNG_SECRET=$/SEARXNG_SECRET=$(openssl rand -hex 32)/" .env
+awk -F= '/^SEARXNG_SECRET=/{print $1, length($2)} /^(WEB_SEARCH_URL|SEARXNG_HOST_PORT)=/{print}' .env
+sudo docker compose config --quiet && echo KONFIGURACE_OK
+```
+
+**Očekávaný výstup:**
+```
+<hash> Hynek Cihlář feat(sources): …
+SEARXNG_SECRET 64
+SEARXNG_HOST_PORT=8013
+WEB_SEARCH_URL=http://searxng:8080
+KONFIGURACE_OK
+```
+
+### 2. Sestavení image Open Notebooku (na pozadí, 10–25 min)
+
+**Stroj:** arcmspark01 · **Složka:** `/home/spark/open-notebook/deploy/arcmspark01` · **Terminál:** SSH
+
+```bash
+cd /home/spark/open-notebook/deploy/arcmspark01
+sudo -v
+nohup sudo -n docker compose build open_notebook > /home/spark/open-notebook-data/build.log 2>&1 &
+echo "PID: $!"
+```
+
+Průběh: `tail -5 /home/spark/open-notebook-data/build.log`. Doběhlo, když `pgrep -f "docker compose build" || echo DOBEHLO` vypíše `DOBEHLO`. **Úspěšně**, pokud `tail -3 /home/spark/open-notebook-data/build.log` ukazuje `open_notebook  Built` (nebo `naming to docker.io/library/open-notebook-cs:local`). Pokud log končí `ERROR` nebo `failed to solve`, pošlete mi `tail -40 /home/spark/open-notebook-data/build.log`.
+
+### 3. Spuštění SearXNG a nové verze aplikace
+
+**Stroj:** arcmspark01 · **Složka:** `/home/spark/open-notebook/deploy/arcmspark01` · **Terminál:** SSH
+
+```bash
+cd /home/spark/open-notebook/deploy/arcmspark01
+sudo docker compose up -d searxng open_notebook
+sleep 60
+sudo docker compose ps searxng open_notebook --format 'table {{.Name}}\t{{.Status}}'
+curl -s 'http://127.0.0.1:8013/search?q=rybn%C3%ADk&format=json&language=cs' | python3 -c "import sys,json; d=json.load(sys.stdin); print('SEARXNG výsledků:', len(d['results'])); print(d['results'][0]['url'])"
+H="Authorization: Bearer $(grep '^OPEN_NOTEBOOK_PASSWORD=' .env | cut -d= -f2)"
+curl -s -H "$H" http://127.0.0.1:5055/api/capabilities; echo
+curl -s -H "$H" 'http://127.0.0.1:5055/api/web-search?q=rybn%C3%ADk&language=cs&limit=5' | python3 -c "import sys,json; d=json.load(sys.stdin); print('API výsledků:', len(d['results'])); [print(' -', r['title'][:70]) for r in d['results']]"
+```
+
+**Očekávaný výstup:**
+```
+NAME          STATUS
+on-app        Up About a minute
+on-searxng    Up About a minute
+SEARXNG výsledků: <číslo větší než 0>
+https://cs.wikipedia.org/wiki/Rybn%C3%ADk   (nebo jiná česká stránka)
+{"docling_available":false,"crawl4ai_available":false,"crawl4ai_remote_configured":false,"web_search_available":true}
+API výsledků: 5
+ - Rybník – Wikipedie
+ - …
+```
+
+- `SEARXNG výsledků: 0` nebo chyba `json`: podívejte se do `sudo docker logs on-searxng 2>&1 | tail -20`. Hlášky `timeout` nebo `access denied` u jednotlivých vyhledávačů jsou běžné, SearXNG je přeskočí. Pokud selžou všechny, arcmspark01 nemá přístup na internet.
+- `"web_search_available":false`: v `.env` je prázdné `WEB_SEARCH_URL`, nebo běží stará image (zopakujte krok 2).
+
+### 4. Zkouška v prohlížeči
+
+**Stroj:** Hyneks-Mac-mini · **Prohlížeč**
+
+V sešitu klikněte na **Přidat zdroj → Vyhledat na webu**, zadejte výraz, zaškrtněte dva výsledky a klikněte na **Přidat vybrané (2)**. Otevře se karta **Přidat URL** s oběma adresami. Pak **Další** / **Hotovo** jako u běžných odkazů. Pokud se volba v nabídce nezobrazí, obnovte stránku (`Cmd+Shift+R`).
+
 Podrobná česká nápověda: [docs/cs](../../docs/cs/index.md).

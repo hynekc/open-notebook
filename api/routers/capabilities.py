@@ -13,7 +13,7 @@ the source-processing graph needs the same signal (it must not pass content-core
 an engine whose runtime is absent).
 
 Endpoints:
-- GET /capabilities - Availability of Docling and Crawl4AI runtimes
+- GET /capabilities - Availability of Docling and Crawl4AI runtimes and web search
 """
 
 from fastapi import APIRouter
@@ -24,6 +24,7 @@ from open_notebook.utils.runtime_capabilities import (
     crawl4ai_remote_configured,
     docling_available,
 )
+from open_notebook.utils.web_search import web_search_configured
 
 router = APIRouter(prefix="/capabilities", tags=["capabilities"])
 
@@ -37,4 +38,5 @@ async def get_capabilities():
         docling_available=docling_available(),
         crawl4ai_available=crawl4ai_local or crawl4ai_remote,
         crawl4ai_remote_configured=crawl4ai_remote,
+        web_search_available=web_search_configured(),
     )

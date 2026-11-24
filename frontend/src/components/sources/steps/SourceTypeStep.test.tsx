@@ -27,3 +27,38 @@ describe('SourceTypeStep', () => {
     expect(extensions).toContain('.pdf')
   })
 })
+
+function LinkStep({ webSearchAvailable, startWithSearch }: { webSearchAvailable: boolean; startWithSearch?: boolean }) {
+  const { control, register, setValue, watch, formState: { errors } } = useForm<FormValues>({
+    defaultValues: { type: 'link', url: '', embed: false, async_processing: false },
+  })
+  return (
+    <>
+      <SourceTypeStep
+        control={control}
+        register={register}
+        setValue={setValue}
+        errors={errors}
+        webSearchAvailable={webSearchAvailable}
+        startWithSearch={startWithSearch}
+      />
+      <output data-testid="url-value">{watch('url')}</output>
+      <output data-testid="type-value">{watch('type')}</output>
+    </>
+  )
+}
+
+describe('SourceTypeStep web search tab', () => {
+  it('is hidden when the server has no web search', () => {
+    render(<LinkStep webSearchAvailable={false} />)
+    expect(screen.queryByRole('tab', { name: /sources.searchWeb/ })).toBeNull()
+  })
+
+  it('opens on the search tab and keeps the form type as link', () => {
+    render(<LinkStep webSearchAvailable startWithSearch />)
+    const tab = screen.getByRole('tab', { name: /sources.searchWeb/ })
+    expect(tab.getAttribute('aria-selected')).toBe('true')
+    expect(screen.getByText('sources.webSearchDescription')).toBeTruthy()
+    expect(screen.getByTestId('type-value').textContent).toBe('link')
+  })
+})

@@ -15,6 +15,7 @@ Zvolte kartu:
 - **Přidat URL**: vložte odkaz. Více odkazů, každý na samostatném řádku, naimportujete najednou.
 - **Nahrát soubor**: vyberte jeden soubor, nebo více souborů pro hromadný import.
 - **Zadat text**: vložte nebo napište text. U textu je **Název** povinný.
+- **Vyhledat na webu** (jen pokud má server nastavené vyhledávání, viz níže): napište hledaný výraz, zaškrtněte vhodné výsledky a klikněte na **Přidat vybrané**. Vybrané adresy se vloží do karty **Přidat URL** a dál se zpracují jako běžné odkazy. Stejnou kartu otevře v sešitu i volba **Přidat zdroj → Vyhledat na webu**.
 
 U jedné URL nebo jednoho souboru je **Název** volitelný; pokud ho necháte prázdný, vytvoří se z obsahu. V hromadném režimu (více než jedna URL nebo soubor) se názvy vytvářejí vždy automaticky a na všechny položky se použijí stejné sešity a transformace. Jedna dávka může obsahovat až **50** URL nebo souborů.
 
@@ -51,6 +52,10 @@ Klikněte na **Hotovo**. Na **Hotovo** můžete kliknout v kterémkoli kroku a o
 - **Články a webové stránky**: stahují se nástrojem pro URL zvoleným v **Nastavení → Zpracování obsahu**. Stránky vykreslované JavaScriptem mohou potřebovat Firecrawl, Jina nebo Crawl4AI; viz [Nástroje pro zpracování obsahu](content-processing-engines.md).
 - **Videa z YouTube**: importuje se přepis. Preferované jazyky přepisu jsou nastavení dostupné přes API (`youtube_preferred_languages` v `GET`/`PUT /api/settings`). Pokud YouTube váš server blokuje, nastavte workeru `CCORE_YOUTUBE_PROXY` nebo `CCORE_YOUTUBE_COOKIES_FILE` ([Environment Reference](../../5-CONFIGURATION/environment-reference.md), anglicky).
 - **Stránky za přihlášením nebo paywallem** obvykle stáhnout nelze. Zkopírujte text a použijte **Zadat text**.
+
+### Vyhledávání na webu
+
+Karta **Vyhledat na webu** se zobrazí, jen když správce serveru nastaví proměnnou `OPEN_NOTEBOOK_WEB_SEARCH_URL` na vlastní instanci [SearXNG](https://docs.searxng.org/) (se zapnutým výstupem `json`). Hledaný výraz tak nejde žádné službě s API klíčem: SearXNG ho předá veřejným vyhledávačům a výsledky vrátí Open Notebooku. Zaškrtnutí **Jen výsledky v jazyce rozhraní** omezí výsledky na jazyk aplikace. Bez zaškrtnutí se hledá ve všech jazycích. Do jedné dávky lze přidat nejvýš 50 adres včetně těch, které už jsou v kartě **Přidat URL**.
 
 ### Text
 

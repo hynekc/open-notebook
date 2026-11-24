@@ -178,6 +178,19 @@ services:
       - SURREAL_EXPERIMENTAL_GRAPHQL=true
     restart: unless-stopped
 
+  searxng:
+    # Vyhledávání nových zdrojů na webu („Přidat zdroj“ → „Vyhledat na webu“).
+    # Dotazy jdou z arcmspark01 na veřejné vyhledávače, bez API klíčů.
+    image: ${SEARXNG_IMAGE:-searxng/searxng:latest}
+    container_name: on-searxng
+    ports:
+      - "127.0.0.1:${SEARXNG_HOST_PORT:-8013}:8080"   # jen pro kontrolu curl
+    environment:
+      - SEARXNG_SECRET=${SEARXNG_SECRET:?Nastavte SEARXNG_SECRET v .env}
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+    restart: unless-stopped
+
   open_notebook:
     build:
       context: ../..
@@ -206,6 +219,8 @@ services:
       # Přepis zvuku a videa přes Whisper (vllm-whisper): Open Notebook dělí
       # nahrávky na 10min úseky; s jedním lokálním serverem posílat po dvou.
       - CCORE_AUDIO_CONCURRENCY=${CCORE_AUDIO_CONCURRENCY:-2}
+      # Vyhledávání zdrojů na webu přes SearXNG (prázdná hodnota = vypnuto)
+      - OPEN_NOTEBOOK_WEB_SEARCH_URL=${WEB_SEARCH_URL-http://searxng:8080}
     volumes:
       - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/notebook_data:/app/data
     depends_on:
@@ -213,4 +228,5 @@ services:
       - vllm-qwen
       - vllm-embed
       - vllm-whisper
+      - searxng
     restart: unless-stopped

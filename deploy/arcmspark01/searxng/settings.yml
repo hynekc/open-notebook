@@ -1,0 +1,30 @@
+# SearXNG pro Open Notebook na arcmspark01 (vyhledávání nových zdrojů na webu)
+# Autor: Hynek Cihlář (Bc. Hynek Cihlář)
+#
+# Běží jen ve vnitřní síti docker compose (a na 127.0.0.1 pro kontrolu).
+# Tajný klíč se nastavuje proměnnou SEARXNG_SECRET v .env, ne tady.
+use_default_settings: true
+
+general:
+  instance_name: "Open Notebook – vyhledávání"
+
+search:
+  safe_search: 1
+  autocomplete: ""
+  # Open Notebook čte výsledky ve formátu JSON (bez něj SearXNG vrací 403)
+  formats:
+    - html
+    - json
+
+server:
+  # Interní služba: bez omezovače dotazů (ten by potřeboval Valkey/Redis)
+  limiter: false
+  public_instance: false
+  image_proxy: false
+
+ui:
+  default_locale: cs
+
+outgoing:
+  request_timeout: 5.0
+  max_request_timeout: 10.0

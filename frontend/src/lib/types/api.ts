@@ -70,6 +70,21 @@ export interface Capabilities {
   docling_available: boolean
   crawl4ai_available: boolean
   crawl4ai_remote_configured: boolean
+  // Older APIs don't send it; treat missing as "not configured"
+  web_search_available?: boolean
+}
+
+export interface WebSearchResult {
+  title: string
+  url: string
+  snippet: string
+  engine?: string | null
+  published_date?: string | null
+}
+
+export interface WebSearchResponse {
+  query: string
+  results: WebSearchResult[]
 }
 
 export interface CreateNotebookRequest {

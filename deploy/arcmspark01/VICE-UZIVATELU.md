@@ -28,6 +28,8 @@ https://notebook.cajk32.lab │                              └─ LDAP ucserve
 
 **Paměť:** jedna instance si vezme zhruba 1,5–2 GB RAM, víc při zpracování velkých PDF. Po spuštění všech modelů zbývá na arcmspark01 asi 12 GB, takže pět instancí se vejde jen těsně. V kroku 12 se proto paměť kontroluje.
 
+**Předpoklad:** nejdřív proveďte v [README.md](README.md) oddíl **Vyhledávání zdrojů na webu (SearXNG)**. Sestaví se v něm nová image Open Notebooku, kterou instance uživatelů používají, a do `.env` se doplní `SEARXNG_SECRET`.
+
 **Co je potřeba od vás:** přístup `root` na `ucserver.cajk32.lab` (kroky 1–3) a vaše uživatelské jméno v UCS (krok 9).
 
 ---
@@ -345,6 +347,7 @@ oauth2-proxy
 on-u-host1
 on-u-hynek
 on-u-jana
+searxng
 surrealdb
 vllm-embed
 vllm-qwen
@@ -509,7 +512,7 @@ sudo -v
 nohup sudo -n docker compose --profile jedna-instance build open_notebook > /home/spark/open-notebook-data/build-$(date +%Y%m%d-%H%M).log 2>&1 &
 ```
 
-Sestavení trvá 10–25 minut. Hotové je, když log končí řádkem s `naming to docker.io/library/open-notebook-cs:local` a `done`:
+Sestavení trvá 10–25 minut. Doběhlo, když `pgrep -f "docker compose" || echo DOBEHLO` vypíše `DOBEHLO`. Úspěšně, pokud log ukazuje `open_notebook  Built` (nebo `naming to docker.io/library/open-notebook-cs:local`):
 
 ```bash
 tail -3 $(ls -t /home/spark/open-notebook-data/build-*.log | head -1)

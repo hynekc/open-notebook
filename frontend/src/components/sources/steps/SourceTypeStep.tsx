@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Control, FieldErrors, UseFormRegister, UseFormSetValue, useWatch } from "react-hook-form"
-import { FileIcon, LinkIcon, FileTextIcon } from "lucide-react"
+import { FileIcon, LinkIcon, FileTextIcon, Search } from "lucide-react"
 import { useTranslation } from "@/lib/hooks/use-translation"
 import { FormSection } from "@/components/ui/form-section"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Controller } from "react-hook-form"
+import { WebSearchPanel } from "@/components/sources/WebSearchPanel"
 
 interface CreateSourceFormData {
   type: 'link' | 'upload' | 'text'
@@ -93,16 +94,50 @@ interface SourceTypeStepProps {
   errors: FieldErrors<CreateSourceFormData>
   urlValidationErrors?: { url: string; line: number }[]
   onClearUrlErrors?: () => void
+  /** Server has web search (SearXNG) configured: show the "Search the web" tab */
+  webSearchAvailable?: boolean
+  /** Open on the "Search the web" tab (dialog opened from "Search the web") */
+  startWithSearch?: boolean
 }
+
+// Pseudo tab: searching only fills the link field, the form type stays 'link'
+const SEARCH_TAB = "search"
 
 const MAX_BATCH_SIZE = 50
 
-export function SourceTypeStep({ control, register, setValue, errors, urlValidationErrors, onClearUrlErrors }: SourceTypeStepProps) {
+export function SourceTypeStep({
+  control,
+  register,
+  setValue,
+  errors,
+  urlValidationErrors,
+  onClearUrlErrors,
+  webSearchAvailable = false,
+  startWithSearch = false,
+}: SourceTypeStepProps) {
   const { t } = useTranslation()
   // Watch the selected type and inputs to detect batch mode
   const selectedType = useWatch({ control, name: 'type' })
   const urlInput = useWatch({ control, name: 'url' })
   const fileInput = useWatch({ control, name: 'file' })
+
+  // "Search the web" tab; reopening step 1 with URLs already filled shows them instead
+  const [searchActive, setSearchActive] = useState(
+    () => webSearchAvailable && startWithSearch && !urlInput
+  )
+  useEffect(() => {
+    if (searchActive && selectedType !== 'link') {
+      setValue('type', 'link')
+    }
+  }, [searchActive, selectedType, setValue])
+
+  const addSearchResults = (urls: string[]) => {
+    const existing = parseUrls(urlInput || '')
+    const merged = [...existing, ...urls.filter((u) => !existing.includes(u))]
+    setValue('url', merged.join('\n'), { shouldValidate: true })
+    onClearUrlErrors?.()
+    setSearchActive(false)
+  }
 
   // Track if HTML content was pasted
   const [hasHtmlContent, setHasHtmlContent] = useState(false)
@@ -163,12 +198,20 @@ export function SourceTypeStep({ control, register, setValue, errors, urlValidat
           control={control}
           name="type"
           render={({ field }) => (
-            <Tabs 
-              value={field.value || ''} 
-              onValueChange={(value) => field.onChange(value as 'link' | 'upload' | 'text')}
+            <Tabs
+              value={searchActive ? SEARCH_TAB : field.value || ''}
+              onValueChange={(value) => {
+                if (value === SEARCH_TAB) {
+                  setSearchActive(true)
+                  field.onChange('link')
+                  return
+                }
+                setSearchActive(false)
+                field.onChange(value as 'link' | 'upload' | 'text')
+              }}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className={`grid w-full ${webSearchAvailable ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 {getSourceTypes(t).map((type) => {
                   const Icon = type.icon
                   return (
@@ -178,7 +221,23 @@ export function SourceTypeStep({ control, register, setValue, errors, urlValidat
                     </TabsTrigger>
                   )
                 })}
+                {webSearchAvailable && (
+                  <TabsTrigger value={SEARCH_TAB} className="gap-2">
+                    <Search className="h-4 w-4" />
+                    {t('sources.searchWeb')}
+                  </TabsTrigger>
+                )}
               </TabsList>
+
+              {webSearchAvailable && (
+                <TabsContent value={SEARCH_TAB} className="mt-4">
+                  <p className="text-sm text-muted-foreground mb-4">{t('sources.webSearchDescription')}</p>
+                  <WebSearchPanel
+                    onAddUrls={addSearchResults}
+                    maxSelectable={Math.max(0, MAX_BATCH_SIZE - urlCount)}
+                  />
+                </TabsContent>
+              )}
               
               {getSourceTypes(t).map((type) => (
                 <TabsContent key={type.value} value={type.value} className="mt-4">
@@ -314,7 +373,7 @@ export function SourceTypeStep({ control, register, setValue, errors, urlValidat
       </FormSection>
 
       {/* Hide title field in batch mode - titles will be auto-generated */}
-      {!isBatchMode && (
+      {!isBatchMode && !searchActive && (
         <FormSection
           htmlFor="source-title"
           title={selectedType === 'text' ? `${t('common.title')} *` : `${t('common.title')} (${t('common.optional')})`}

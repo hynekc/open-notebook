@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Plus, FileText, Link2, ChevronDown, Loader2, ListChecks } from 'lucide-react'
+import { Plus, FileText, Link2, ChevronDown, Loader2, ListChecks, Search } from 'lucide-react'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { EmptyState } from '@/components/common/EmptyState'
 import { AddSourceDialog } from '@/components/sources/AddSourceDialog'
@@ -24,6 +24,7 @@ import type { SourceBulkAction } from '@/lib/utils/source-context'
 import { CollapsibleColumn, createCollapseButton } from '@/components/notebooks/CollapsibleColumn'
 import { useNotebookColumnsStore } from '@/lib/stores/notebook-columns-store'
 import { useTranslation } from '@/lib/hooks/use-translation'
+import { useCapabilities } from '@/lib/hooks/use-capabilities'
 
 interface SourcesColumnProps {
   sources?: SourceListResponse[]
@@ -55,6 +56,9 @@ export function SourcesColumn({
   const { t } = useTranslation()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [addDialogMode, setAddDialogMode] = useState<'search' | undefined>(undefined)
+  const { data: capabilities } = useCapabilities()
+  const webSearchAvailable = capabilities?.web_search_available === true
   const [addExistingDialogOpen, setAddExistingDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [sourceToDelete, setSourceToDelete] = useState<string | null>(null)
@@ -194,10 +198,16 @@ export function SourcesColumn({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => { setDropdownOpen(false); setAddDialogOpen(true); }}>
+                    <DropdownMenuItem onClick={() => { setDropdownOpen(false); setAddDialogMode(undefined); setAddDialogOpen(true); }}>
                       <Plus className="h-4 w-4 mr-2" />
                       {t('sources.addSource')}
                     </DropdownMenuItem>
+                    {webSearchAvailable && (
+                      <DropdownMenuItem onClick={() => { setDropdownOpen(false); setAddDialogMode('search'); setAddDialogOpen(true); }}>
+                        <Search className="h-4 w-4 mr-2" />
+                        {t('sources.searchWeb')}
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => { setDropdownOpen(false); setAddExistingDialogOpen(true); }}>
                       <Link2 className="h-4 w-4 mr-2" />
                       {t('sources.addExistingTitle')}
@@ -253,9 +263,12 @@ export function SourcesColumn({
       </CollapsibleColumn>
 
       <AddSourceDialog
+        // Remount per mode so the dialog opens on the chosen tab
+        key={addDialogMode ?? 'add'}
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         defaultNotebookId={notebookId}
+        initialMode={addDialogMode}
       />
 
       <AddExistingSourceDialog

@@ -15,6 +15,7 @@ Choose a tab:
 - **Add URL**: paste a link. Paste several links, one per line, to import them in one go.
 - **Upload File**: pick one file, or several to import them in one go.
 - **Enter Text**: paste or type text. A **Title** is required for text.
+- **Search the Web** (only when the server has web search set up, see below): type a query, tick the results you want and click **Add selected**. The chosen addresses go into the **Add URL** tab and are processed like any other link. In a notebook, **Add Source → Search the Web** opens the same tab.
 
 For a single URL or file, the **Title** is optional; if you leave it empty, one is generated from the content. In batch mode (more than one URL or file) titles are always generated, and the same notebooks and transformations apply to every item. A batch can hold up to **50** URLs or files.
 
@@ -51,6 +52,10 @@ Click **Done**. You can click **Done** on any step to submit with the current ch
 - **Articles and web pages**: fetched with the URL engine chosen in **Settings → Content Processing**. Pages that render with JavaScript may need Firecrawl, Jina or Crawl4AI; see [Content Processing Engines](content-processing-engines.md).
 - **YouTube videos**: the transcript is imported. The preferred transcript languages are a setting reachable through the API (`youtube_preferred_languages` in `GET`/`PUT /api/settings`). If YouTube blocks your server, set `CCORE_YOUTUBE_PROXY` or `CCORE_YOUTUBE_COOKIES_FILE` for the worker ([Environment Reference](../5-CONFIGURATION/environment-reference.md)).
 - **Pages behind a login or paywall** generally can't be fetched. Copy the text and use **Enter Text** instead.
+
+### Web search
+
+The **Search the Web** tab appears only when the server operator sets `OPEN_NOTEBOOK_WEB_SEARCH_URL` to a self-hosted [SearXNG](https://docs.searxng.org/) instance (with the `json` output format enabled). Your query then goes to no service with an API key: SearXNG passes it to public search engines and returns the results to Open Notebook. **Only results in the interface language** limits results to the app's language; untick it to search all languages. One batch holds at most 50 addresses, including those already in the **Add URL** tab.
 
 ### Text
 

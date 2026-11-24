@@ -712,6 +712,23 @@ class CapabilitiesResponse(BaseModel):
         ...,
         description="A remote Crawl4AI endpoint is configured via CRAWL4AI_API_URL (no local install needed).",
     )
+    web_search_available: bool = Field(
+        False,
+        description="Web search for new sources is configured (OPEN_NOTEBOOK_WEB_SEARCH_URL points to SearXNG).",
+    )
+
+
+class WebSearchResultResponse(BaseModel):
+    title: str
+    url: str
+    snippet: str = ""
+    engine: Optional[str] = None
+    published_date: Optional[str] = None
+
+
+class WebSearchResponse(BaseModel):
+    query: str
+    results: List[WebSearchResultResponse]
 
 
 def validate_url_key_provider_required_fields(

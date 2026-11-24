@@ -9,6 +9,7 @@ vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), warning: v
 vi.mock('@/lib/hooks/use-notebooks', () => ({ useNotebooks: () => ({ data: [], isLoading: false }) }))
 vi.mock('@/lib/hooks/use-transformations', () => ({ useTransformations: () => ({ data: [], isLoading: false }) }))
 vi.mock('@/lib/hooks/use-settings', () => ({ useSettings: () => ({ data: {} }) }))
+vi.mock('@/lib/hooks/use-capabilities', () => ({ useCapabilities: () => ({ data: { web_search_available: false } }) }))
 const mutateAsync = vi.fn()
 vi.mock('@/lib/hooks/use-sources', () => ({ useCreateSource: () => ({ mutateAsync, isPending: false }) }))
 

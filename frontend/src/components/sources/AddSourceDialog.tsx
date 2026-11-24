@@ -23,6 +23,7 @@ import { useNotebooks } from '@/lib/hooks/use-notebooks'
 import { useTransformations } from '@/lib/hooks/use-transformations'
 import { useCreateSource } from '@/lib/hooks/use-sources'
 import { useSettings } from '@/lib/hooks/use-settings'
+import { useCapabilities } from '@/lib/hooks/use-capabilities'
 import { CreateSourceRequest, DuplicateSourceInfo } from '@/lib/types/api'
 import { sourcesApi } from '@/lib/api/sources'
 import { useTranslation } from '@/lib/hooks/use-translation'
@@ -76,6 +77,8 @@ interface AddSourceDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultNotebookId?: string
+  /** Open on the "Search the web" tab (only when the server has web search) */
+  initialMode?: 'search'
 }
 
 interface ProcessingState {
@@ -92,8 +95,9 @@ interface BatchProgress {
 
 export function AddSourceDialog({ 
   open, 
-  onOpenChange, 
-  defaultNotebookId 
+  onOpenChange,
+  defaultNotebookId,
+  initialMode,
 }: AddSourceDialogProps) {
   const { t } = useTranslation()
 
@@ -133,6 +137,8 @@ export function AddSourceDialog({
   const { data: notebooks = [], isLoading: notebooksLoading } = useNotebooks()
   const { data: transformations = [], isLoading: transformationsLoading } = useTransformations()
   const { data: settings } = useSettings()
+  const { data: capabilities } = useCapabilities()
+  const webSearchAvailable = capabilities?.web_search_available === true
 
   // Form setup
   const {
@@ -664,6 +670,8 @@ export function AddSourceDialog({
                 errors={errors}
                 urlValidationErrors={urlValidationErrors}
                 onClearUrlErrors={handleClearUrlErrors}
+                webSearchAvailable={webSearchAvailable}
+                startWithSearch={initialMode === 'search'}
               />
             )}
             

@@ -216,6 +216,7 @@ def compose_uzivatelu(
         "  OPEN_NOTEBOOK_WORKER_MAX_TASKS: ${ON_INSTANCE_WORKER_MAX_TASKS:-1}",
         "  OPEN_NOTEBOOK_ENABLE_DOCLING: ${ENABLE_DOCLING:-false}",
         "  CCORE_AUDIO_CONCURRENCY: ${CCORE_AUDIO_CONCURRENCY:-2}",
+        "  OPEN_NOTEBOOK_WEB_SEARCH_URL: ${WEB_SEARCH_URL-http://searxng:8080}",
         "",
         "services:",
     ]

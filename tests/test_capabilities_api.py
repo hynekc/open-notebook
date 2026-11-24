@@ -28,6 +28,7 @@ def _patch_probes(monkeypatch, *, docling, crawl4ai_local, crawl4ai_remote):
     monkeypatch.setattr(
         "api.routers.capabilities.crawl4ai_local_ready", lambda: crawl4ai_local
     )
+    monkeypatch.setattr("api.routers.capabilities.web_search_configured", lambda: False)
 
 
 class TestCapabilitiesEndpoint:
@@ -41,6 +42,7 @@ class TestCapabilitiesEndpoint:
             "docling_available": False,
             "crawl4ai_available": False,
             "crawl4ai_remote_configured": False,
+            "web_search_available": False,
         }
 
     def test_docling_available_is_independent_of_crawl4ai(self, client, monkeypatch):
