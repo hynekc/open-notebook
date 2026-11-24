@@ -30,49 +30,87 @@ https://notebook.cajk32.lab │                              └─ LDAP ucserve
 
 **Předpoklad:** nejdřív proveďte v [README.md](README.md) oddíl **Vyhledávání zdrojů na webu (SearXNG)**. Sestaví se v něm nová image Open Notebooku, kterou instance uživatelů používají, a do `.env` se doplní `SEARXNG_SECRET`.
 
-**Co je potřeba od vás:** přístup `root` na `ucserver.cajk32.lab` (kroky 1–3) a vaše uživatelské jméno v UCS (krok 9).
+**Co je potřeba od vás:** heslo uživatele `root` na `ucserver.cajk32.lab` (kroky 1–3, přes `su -`) a vaše uživatelské jméno v UCS (krok 9).
 
 ---
 
-## Krok 1 – DNS záznam `notebook.cajk32.lab`
+## Krok 1 – DNS záznamy `arcmspark01` a `notebook.cajk32.lab`
 
-**Stroj:** ucserver.cajk32.lab · **Složka:** `/root` · **Terminál:** SSH z Macu (`ssh root@ucserver.cajk32.lab`)
+### 1a – adresa a DNS arcmspark01
+
+**Stroj:** arcmspark01 · **Složka:** `/home/spark` · **Terminál:** SSH z Macu (`ssh spark@arcmspark01`)
 
 ```bash
-cd /root
-ucr get ldap/base
-host arcmspark01.cajk32.lab
+cd /home/spark
+hostname -I
+ip -4 route get 192.168.110.250
+resolvectl status | grep -E 'DNS Servers|DNS Domain'
+getent hosts ucserver.cajk32.lab
 ```
 
 **Očekávaný výstup:**
 ```
-dc=cajk32,dc=lab
-arcmspark01.cajk32.lab has address 192.168.110.xxx
+192.168.110.xxx 172.17.0.1 ...
+192.168.110.250 dev <rozhraní> src 192.168.110.xxx uid 1000
+       DNS Servers: 192.168.110.250
+        DNS Domain: cajk32.lab
+192.168.110.250  ucserver.cajk32.lab
 ```
 
-Pokud `ldap/base` vypíše jinou hodnotu, použijte ji místo `dc=cajk32,dc=lab` ve všech dalších krocích. Pokud `host` hlásí `not found`, nejdřív v UMC (Doménové služby → DNS) založte záznam A pro arcmspark01.
+Adresa za `src` je adresa arcmspark01 v síti laboratoře. Budete ji potřebovat v kroku 1b.
+
+- Pokud `DNS Servers` neobsahuje `192.168.110.250`, arcmspark01 nepoužívá DNS z UCS. Napište mi a doplníme to.
+- Pokud `getent` nic nevypíše, arcmspark01 nezná `ucserver.cajk32.lab` a přihlašování přes LDAP by nefungovalo.
+
+### 1b – záznamy v DNS UCS
+
+Příkazy `ucr`, `udm` a `univention-certificate` potřebují uživatele **root**. Uživatel `Administrator` je nemá v cestě a do `/root` nesmí. Proto se nejdřív přepnete na roota příkazem `su -` a zadáte heslo uživatele root na ucserver.
+
+**Stroj:** ucserver.cajk32.lab · **Složka:** `/root` · **Terminál:** SSH z Macu (`ssh Administrator@ucserver.cajk32.lab`), po `su -` jako root
 
 ```bash
+su -
+```
+
+**Očekávaný výstup:** výzva `Heslo:`. Po zadání hesla roota se výzva změní na `root@ucserver:~#`.
+
+Místo `192.168.110.xxx` napište adresu arcmspark01 z kroku 1a.
+
+```bash
+cd /root
+ucr get ldap/base
+udm dns/host_record create \
+  --superordinate "zoneName=cajk32.lab,cn=dns,$(ucr get ldap/base)" \
+  --set name=arcmspark01 \
+  --set a=192.168.110.xxx
 udm dns/alias create \
   --superordinate "zoneName=cajk32.lab,cn=dns,$(ucr get ldap/base)" \
   --set name=notebook \
   --set cname=arcmspark01.cajk32.lab.
 sleep 5
+host arcmspark01.cajk32.lab
 host notebook.cajk32.lab
 ```
 
 **Očekávaný výstup:**
 ```
+dc=cajk32,dc=lab
+Object created: relativeDomainName=arcmspark01,zoneName=cajk32.lab,cn=dns,dc=cajk32,dc=lab
 Object created: relativeDomainName=notebook,zoneName=cajk32.lab,cn=dns,dc=cajk32,dc=lab
+arcmspark01.cajk32.lab has address 192.168.110.xxx
 notebook.cajk32.lab is an alias for arcmspark01.cajk32.lab.
 arcmspark01.cajk32.lab has address 192.168.110.xxx
 ```
+
+- Pokud `ldap/base` vypíše jinou hodnotu než `dc=cajk32,dc=lab`, použijte ji ve všech dalších krocích.
+- Hláška `Object exists` u `arcmspark01` znamená, že záznam už je (např. v jiné podobě). Pokračujte, jen ověřte, že `host arcmspark01.cajk32.lab` vrací správnou adresu.
+- Okno s `root@ucserver:~#` nechte otevřené, použijete ho v krocích 2 a 3.
 
 ---
 
 ## Krok 2 – certifikát pro `notebook.cajk32.lab` z CA UCS
 
-**Stroj:** ucserver.cajk32.lab · **Složka:** `/root` · **Terminál:** SSH (z kroku 1)
+**Stroj:** ucserver.cajk32.lab · **Složka:** `/root` · **Terminál:** SSH jako root (`su -` z kroku 1b, výzva `root@ucserver:~#`)
 
 ```bash
 cd /root
@@ -96,7 +134,7 @@ Počítače v doméně důvěřují kořenové CA UCS, takže prohlížeč nebud
 
 Dex se přes tento účet do LDAP jen dívá, jestli uživatel existuje, a pak ověří jeho heslo. Účet typu `users/ldap` se nemůže přihlásit k počítačům ani do UMC.
 
-**Stroj:** ucserver.cajk32.lab · **Složka:** `/root` · **Terminál:** SSH (z kroku 1)
+**Stroj:** ucserver.cajk32.lab · **Složka:** `/root` · **Terminál:** SSH jako root (`su -` z kroku 1b, výzva `root@ucserver:~#`)
 
 ```bash
 cd /root
@@ -185,7 +223,7 @@ ls -l /home/spark/open-notebook-data/caddy/certs
 openssl verify -CAfile /home/spark/open-notebook-data/caddy/certs/ucs-root-ca.crt /home/spark/open-notebook-data/caddy/certs/notebook.crt
 ```
 
-`scp` se dvakrát zeptá na heslo uživatele root na ucserver.
+`scp` se dvakrát zeptá na heslo uživatele root na ucserver. Pokud ucserver nepovoluje přihlášení roota přes SSH (`Permission denied`), napište mi, zkopírujeme soubory přes uživatele Administrator.
 
 **Očekávaný výstup:**
 ```
