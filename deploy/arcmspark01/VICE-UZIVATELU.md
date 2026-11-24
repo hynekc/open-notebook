@@ -60,6 +60,7 @@ getent hosts ucserver.cajk32.lab
 Adresa za `src` je adresa arcmspark01 v síti laboratoře. Budete ji potřebovat v kroku 1b.
 
 - Pokud `DNS Servers` neobsahuje `192.168.110.250`, arcmspark01 nepoužívá DNS z UCS. Napište mi a doplníme to.
+- Jsou-li v `DNS Servers` i jiné servery (např. `192.168.110.1`, `8.8.8.8`), nevadí to: Dex se ptá jen DNS z UCS (`UCS_DNS` v `.env`).
 - Pokud `getent` nic nevypíše, arcmspark01 nezná `ucserver.cajk32.lab` a přihlašování přes LDAP by nefungovalo.
 
 ### 1b – záznamy v DNS UCS

@@ -79,6 +79,10 @@ services:
     # dex.yaml má práva 600 a patří uživateli spark – Dex ho čte pod jeho UID
     user: "${ON_UID:-1000}:${ON_GID:-1000}"
     command: ["dex", "serve", "/etc/dex/config.yaml"]
+    # arcmspark01 má v DNS i 192.168.110.1 a 8.8.8.8, které cajk32.lab neznají.
+    # Dex proto ptáme jen na DNS z UCS, aby LDAP server našel vždy.
+    dns:
+      - ${UCS_DNS:-192.168.110.250}
     volumes:
       - ./vice-uzivatelu/dex.yaml:/etc/dex/config.yaml:ro
       - ${ON_DATA_DIR:-/home/spark/open-notebook-data}/caddy/certs/ucs-root-ca.crt:/etc/dex/ucs-root-ca.crt:ro
