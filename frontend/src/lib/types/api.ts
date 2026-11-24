@@ -120,6 +120,17 @@ export interface CreateNoteRequest {
   notebook_id?: string
 }
 
+/** POST /notes/generate: exactly one of transformation_id / prompt */
+export interface GenerateNoteRequest {
+  notebook_id: string
+  /** Omitted = all sources of the notebook */
+  source_ids?: string[]
+  transformation_id?: string
+  prompt?: string
+  title?: string
+  model_id?: string
+}
+
 export interface CreateSourceRequest {
   // Backward compatibility: support old single notebook_id
   notebook_id?: string

@@ -14,6 +14,15 @@ Poznámky se liší od **poznatků**: poznatky vytvářejí transformace a jsou 
 2. Přidejte název (volitelné) a v editoru Markdownu napište obsah.
 3. Klikněte na **Vytvořit poznámku**.
 
+### Vygenerovaná poznámka ze zdrojů
+
+Ve sloupci **Poznámky** klikněte na **Vygenerovat**. V okně zvolte:
+
+- **Z dotazu**: napište otázku nebo zadání (např. „Shrň hlavní argumenty a vypiš otevřené otázky“).
+- **Transformací**: vyberte transformaci, např. **Husté shrnutí** nebo **Klíčové poznatky**.
+
+Pod tím zaškrtněte zdroje sešitu, ze kterých se má vycházet (výchozí jsou všechny), a případně vyplňte název. Model dostane celý text vybraných zdrojů a výsledek se uloží jako AI poznámka. Když název nevyplníte, vymyslí ho model. Generování trvá podle délky zdrojů desítky sekund až několik minut a okno se během něj nezavře. Pokud jsou vybrané zdroje dohromady příliš dlouhé, aplikace vás požádá o méně zdrojů (limit nastavuje správce proměnnou `OPEN_NOTEBOOK_NOTE_GENERATION_MAX_CHARS`).
+
 ### Uložení odpovědi chatu
 
 Pod kteroukoli odpovědí chatu se sešitem klikněte na ikonu **Uložit do poznámky**. Poznámka se ihned vytvoří jako **Vytvořila AI** s názvem, který z obsahu vytvoří model transformací (nebo model chatu). Žádný dialog se neotevře; chcete-li jiný název, poznámku pak upravte.

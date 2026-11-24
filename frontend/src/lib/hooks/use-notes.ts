@@ -3,8 +3,8 @@ import { notesApi } from '@/lib/api/notes'
 import { QUERY_KEYS } from '@/lib/api/query-client'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useTranslation } from '@/lib/hooks/use-translation'
-import { getApiErrorKey } from '@/lib/utils/error-handler'
-import { CreateNoteRequest, UpdateNoteRequest } from '@/lib/types/api'
+import { getApiErrorKey, getApiErrorMessage } from '@/lib/utils/error-handler'
+import { CreateNoteRequest, GenerateNoteRequest, UpdateNoteRequest } from '@/lib/types/api'
 
 export function useNotes(notebookId?: string) {
   return useQuery({
@@ -43,6 +43,32 @@ export function useCreateNote() {
       toast({
         title: t('common.error'),
         description: getApiErrorKey(error, t('notebooks.failedToCreateNote')),
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+export function useGenerateNote() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (data: GenerateNoteRequest) => notesApi.generate(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.notes(variables.notebook_id)
+      })
+      toast({
+        title: t('common.success'),
+        description: t('notebooks.noteGeneratedSuccess'),
+      })
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: t('notebooks.failedToGenerateNote'),
+        description: getApiErrorMessage(error, (key) => t(key), 'notebooks.failedToGenerateNote'),
         variant: 'destructive',
       })
     },

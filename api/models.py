@@ -224,6 +224,38 @@ class NoteCreate(BaseModel):
     )
 
 
+class NoteGenerateRequest(BaseModel):
+    """Generate an AI note from notebook sources with a transformation or a prompt."""
+
+    notebook_id: str = Field(..., description="Notebook the note is created in")
+    source_ids: Optional[List[str]] = Field(
+        None,
+        description="Sources of the notebook to use; empty or missing = all its sources",
+    )
+    transformation_id: Optional[str] = Field(
+        None, description="Transformation to run over the sources"
+    )
+    prompt: Optional[str] = Field(
+        None,
+        max_length=4000,
+        description="Free-form question or instruction (instead of a transformation)",
+    )
+    title: Optional[str] = Field(
+        None, max_length=300, description="Note title; generated when empty"
+    )
+    model_id: Optional[str] = Field(
+        None, description="Model override; default is the transformation model"
+    )
+
+    @model_validator(mode="after")
+    def _exactly_one_instruction(self):
+        has_transformation = bool(self.transformation_id)
+        has_prompt = bool(self.prompt and self.prompt.strip())
+        if has_transformation == has_prompt:
+            raise ValueError("Provide either transformation_id or prompt")
+        return self
+
+
 class NoteUpdate(BaseModel):
     title: Optional[str] = Field(None, description="Note title")
     content: Optional[str] = Field(None, description="Note content")

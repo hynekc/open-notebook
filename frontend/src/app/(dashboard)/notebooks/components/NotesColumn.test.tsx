@@ -28,6 +28,12 @@ vi.mock('./NoteEditorDialog', () => ({
   ),
 }))
 
+vi.mock('./GenerateNoteDialog', () => ({
+  GenerateNoteDialog: ({ open, sources }: { open: boolean; sources?: { id: string }[] }) => (
+    <div data-testid="generate-note-dialog" data-open={String(open)} data-sources={String(sources?.length ?? 0)} />
+  ),
+}))
+
 vi.mock('@/lib/hooks/use-notes', () => ({
   useDeleteNote: () => ({ isPending: false, mutateAsync: vi.fn() }),
 }))
@@ -104,5 +110,21 @@ describe('NotesColumn', () => {
 
     expect(editor).toHaveAttribute('data-open', 'true')
     expect(editor).toHaveAttribute('data-note-id', '')
+  })
+
+  it('opens the generate dialog with the notebook sources', () => {
+    render(
+      <NotesColumn
+        notes={[]}
+        isLoading={false}
+        notebookId={notebookId}
+        sources={[{ id: 'source:1' }, { id: 'source:2' }] as never}
+      />
+    )
+    const dialog = screen.getByTestId('generate-note-dialog')
+    expect(dialog).toHaveAttribute('data-open', 'false')
+    fireEvent.click(screen.getByText('notebooks.generateButton'))
+    expect(dialog).toHaveAttribute('data-open', 'true')
+    expect(dialog).toHaveAttribute('data-sources', '2')
   })
 })

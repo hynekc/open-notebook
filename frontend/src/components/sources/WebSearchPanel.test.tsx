@@ -86,7 +86,7 @@ describe('WebSearchPanel', () => {
     render(<WebSearchPanel onAddUrls={vi.fn()} maxSelectable={50} />)
     fireEvent.change(screen.getByLabelText('sources.webSearchQueryLabel'), { target: { value: 'x' } })
     fireEvent.click(screen.getByRole('button', { name: /sources.webSearchButton/ }))
-    await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('The search engine is not reachable'))
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('apiErrors.webSearchUnreachable'))
   })
 
   it('Enter in the query field searches instead of submitting a form', async () => {

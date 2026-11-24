@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { NoteResponse } from '@/lib/types/api'
+import { NoteResponse, SourceListResponse } from '@/lib/types/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -10,11 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Plus, StickyNote, Bot, User, MoreVertical, Trash2, ListChecks, ChevronDown } from 'lucide-react'
+import { Plus, StickyNote, Bot, User, MoreVertical, Trash2, ListChecks, ChevronDown, Sparkles } from 'lucide-react'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Badge } from '@/components/ui/badge'
 import { NoteEditorDialog } from './NoteEditorDialog'
+import { GenerateNoteDialog } from './GenerateNoteDialog'
 import { getDateLocale } from '@/lib/utils/date-locale'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
@@ -34,6 +35,8 @@ interface NotesColumnProps {
   contextSelections?: Record<string, NoteContextMode>
   onContextModeChange?: (noteId: string, mode: NoteContextMode) => void
   onBulkContextModeChange?: (action: NoteContextDefault) => void
+  /** Notebook sources, offered when generating a note */
+  sources?: SourceListResponse[]
 }
 
 export function NotesColumn({
@@ -42,11 +45,13 @@ export function NotesColumn({
   notebookId,
   contextSelections,
   onContextModeChange,
-  onBulkContextModeChange
+  onBulkContextModeChange,
+  sources,
 }: NotesColumnProps) {
   const { t, language } = useTranslation()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<NoteResponse | undefined>()
+  const [generateOpen, setGenerateOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
 
@@ -116,7 +121,17 @@ export function NotesColumn({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
-                <Button size="sm" onClick={() => handleOpenEditor()}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 whitespace-nowrap"
+                  onClick={() => setGenerateOpen(true)}
+                  title={t('notebooks.generateNote')}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {t('notebooks.generateButton')}
+                </Button>
+                <Button size="sm" className="shrink-0 whitespace-nowrap" onClick={() => handleOpenEditor()}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t('common.writeNote')}
                 </Button>
@@ -220,6 +235,13 @@ export function NotesColumn({
           </CardContent>
         </Card>
       </CollapsibleColumn>
+
+      <GenerateNoteDialog
+        open={generateOpen}
+        onOpenChange={setGenerateOpen}
+        notebookId={notebookId}
+        sources={sources}
+      />
 
       <NoteEditorDialog
         open={editorOpen}

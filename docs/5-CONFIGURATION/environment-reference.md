@@ -91,6 +91,7 @@ With Docker Compose, the shipped compose file reads `OPEN_NOTEBOOK_ENCRYPTION_KE
 | `OPEN_NOTEBOOK_MAX_UPLOAD_SIZE_MB` | `100` | API | Largest request body the API accepts. Larger requests get `413 Request body exceeds the maximum allowed upload size`. By default the browser uploads straight to the API (port 5055), so this is the app's only limit. When `API_URL` points at the frontend's own URL, uploads go through the Next.js `/api/*` forwarding instead, which is capped at 100 MB in the build. A reverse proxy's own limit (nginx `client_max_body_size`) also applies |
 | `OPEN_NOTEBOOK_WEB_SEARCH_URL` | none | API | Base URL of a self-hosted [SearXNG](https://docs.searxng.org/) instance (for example `http://searxng:8080`) with the `json` output format enabled. When set, **Add Source** gets a **Search the Web** tab that adds the picked results as link sources. Unset disables it |
 | `OPEN_NOTEBOOK_WEB_SEARCH_TIMEOUT` | `15` | API | Seconds to wait for SearXNG before the search fails |
+| `OPEN_NOTEBOOK_NOTE_GENERATION_MAX_CHARS` | `600000` | API | Most characters of source text **Notes → Generate** sends to the model at once. Larger selections are refused with a request to pick fewer sources |
 
 ### Outbound proxy
 

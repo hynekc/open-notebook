@@ -37,6 +37,13 @@ export const ERROR_MAP: Record<string, string> = {
   "No answer generated": "apiErrors.noAnswerGenerated",
   "Source has no text content": "apiErrors.sourceHasNoText",
   "There is no text content to transform": "apiErrors.sourceHasNoText",
+  "Some of the selected sources are not in this notebook": "apiErrors.noteSourcesNotInNotebook",
+  "The selected sources have no text yet": "apiErrors.noteSourcesNoText",
+  "The selected sources are too long together": "apiErrors.noteSourcesTooLong",
+  "The search engine is not reachable": "apiErrors.webSearchUnreachable",
+  "The search engine did not answer in time": "apiErrors.webSearchTimeout",
+  "The search engine refused the request": "apiErrors.webSearchRefused",
+  "Web search is not configured": "apiErrors.webSearchNotConfigured",
 };
 
 /**

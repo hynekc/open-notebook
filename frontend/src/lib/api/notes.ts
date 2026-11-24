@@ -1,5 +1,5 @@
 import apiClient from './client'
-import { NoteResponse, CreateNoteRequest, UpdateNoteRequest } from '@/lib/types/api'
+import { NoteResponse, CreateNoteRequest, GenerateNoteRequest, UpdateNoteRequest } from '@/lib/types/api'
 
 export const notesApi = {
   list: async (params?: { notebook_id?: string }) => {
@@ -14,6 +14,12 @@ export const notesApi = {
 
   create: async (data: CreateNoteRequest) => {
     const response = await apiClient.post<NoteResponse>('/notes', data)
+    return response.data
+  },
+
+  /** AI note from notebook sources; waits for the model (can take minutes) */
+  generate: async (data: GenerateNoteRequest) => {
+    const response = await apiClient.post<NoteResponse>('/notes/generate', data)
     return response.data
   },
 
